@@ -13,10 +13,13 @@
 #include "BLEHIDDevice.h"
 #endif // USE_NIMBLE
 #include "HIDTypes.h"
-#include <driver/adc.h>
-#include "sdkconfig.h"
 
+#if defined(ARDUINO_ARCH_ESP32)
+  #include <driver/adc.h>
+  #include "sdkconfig.h"
+#endif
 
+/*
 #if defined(CONFIG_ARDUHAL_ESP_LOG)
   #include "esp32-hal-log.h"
   #define LOG_TAG ""
@@ -24,7 +27,7 @@
   #include "esp_log.h"
   static const char* LOG_TAG = "BLEDevice";
 #endif
-
+*/
 
 // Report IDs:
 #define KEYBOARD_ID 0x01
@@ -143,7 +146,7 @@ void BleKeyboard::begin(void)
   advertising->start();
   hid->setBatteryLevel(batteryLevel);
 
-  ESP_LOGD(LOG_TAG, "Advertising started!");
+  // ESP_LOGD(LOG_TAG, "Advertising started!");
 }
 
 void BleKeyboard::end(void)
@@ -531,16 +534,28 @@ void BleKeyboard::onDisconnect(BLEServer* pServer) {
 void BleKeyboard::onWrite(BLECharacteristic* me) {
   uint8_t* value = (uint8_t*)(me->getValue().c_str());
   (void)value;
-  ESP_LOGI(LOG_TAG, "special keys: %d", *value);
+  // ESP_LOGI(LOG_TAG, "special keys: %d", *value);
 }
 
 void BleKeyboard::delay_ms(uint64_t ms) {
-  uint64_t m = esp_timer_get_time();
-  if(ms){
-    uint64_t e = (m + (ms * 1000));
-    if(m > e){ //overflow
-        while(esp_timer_get_time() > e) { }
-    }
-    while(esp_timer_get_time() < e) {}
-  }
+  #if defined(ARDUINO_ARCH_ESP32)
+	uint64_t m = esp_timer_get_time();
+	if(ms){
+		uint64_t e = (m + (ms * 1000));
+		if(m > e){ //overflow
+			while(esp_timer_get_time() > e) { }
+		}
+		while(esp_timer_get_time() < e) {}
+	}
+  #elif defined(ARDUINO_BBC_MICROBIT_V2)
+    unsigned long start = millis();
+	if(ms){
+		unsigned long end = start + ms;
+
+		if (start > end) {
+			while (millis() > end) { }
+		}
+		while (millis() < end) { }
+	}
+  #endif
 }

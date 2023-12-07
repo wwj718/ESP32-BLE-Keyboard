@@ -1,10 +1,12 @@
 // uncomment the following line to use NimBLE library
 //#define USE_NIMBLE
 
-#ifndef ESP32_BLE_KEYBOARD_H
-#define ESP32_BLE_KEYBOARD_H
-#include "sdkconfig.h"
-#if defined(CONFIG_BT_ENABLED)
+// #ifndef ESP32_BLE_KEYBOARD_H
+// #define ESP32_BLE_KEYBOARD_H
+#if defined(ARDUINO_ARCH_ESP32)
+  #include "sdkconfig.h"
+#endif
+// #if defined(CONFIG_BT_ENABLED)
 
 #if defined(USE_NIMBLE)
 
@@ -179,5 +181,5 @@ protected:
 
 };
 
-#endif // CONFIG_BT_ENABLED
-#endif // ESP32_BLE_KEYBOARD_H
+// #endif // CONFIG_BT_ENABLED
+// #endif // ESP32_BLE_KEYBOARD_H
